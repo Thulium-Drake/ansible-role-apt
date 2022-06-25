@@ -29,9 +29,12 @@
     expected_type: 'list'
 
 - name: 'Configure APT'
-  template:
+  ansible.builtin.template:
     src: "{{ file['src'] }}"
-    dest: "{{ file['dest']}}"
+    dest: "{{ file['dest'] }}"
+    owner: 'root'
+    group: 'root'
+    mode: 0644
   loop:
     - src: 'apt-periodic.j2'
       dest: '/etc/apt/apt.conf.d/10periodic'
@@ -43,7 +46,7 @@
     loop_var: 'file'
 
 - name: 'Configure Debian main repos'
-  copy:
+  ansible.builtin.copy:
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
@@ -53,6 +56,9 @@
       {% endif %}
       {% endfor %}
     dest: '/etc/apt/sources.list.d/debian.list'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
   notify: 'update apt cache'
   vars:
     deb_repos:
@@ -73,9 +79,34 @@
         skip: "{{ not debian_backports_enabled }}"
   when:
     - ansible_facts['distribution'] == "Debian"
+    - not is_raspbian
+
+- name: 'Configure Raspbian main repos'
+  ansible.builtin.copy:
+    content: |
+      # This file is managed by Ansible.
+      # YOUR CHANGES WILL BE LOST!
+      {% for rasp_repo in rasp_repos %}
+      {% if not rasp_repo['skip'] %}
+      deb {{ raspbian_repo_mirror }}/{{ rasp_repo['distro'] }} {{ rasp_repo['release'] }} {{ raspbian_repo_components }}
+      {% endif %}
+      {% endfor %}
+    dest: '/etc/apt/sources.list.d/raspbian.list'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
+  notify: 'update apt cache'
+  vars:
+    rasp_repos:
+      - distro: 'raspbian'
+        release: "{{ ansible_facts['distribution_release'] }}"
+        skip: false
+  when:
+    - ansible_facts['distribution'] == "Debian"
+    - is_raspbian
 
 - name: 'Configure Ubuntu main repos'
-  copy:
+  ansible.builtin.copy:
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
@@ -83,6 +114,9 @@
       deb {{ ubuntu_repo_mirror }} {{ ubt_repo }} {{ ubuntu_repo_components }}
       {% endfor %}
     dest: '/etc/apt/sources.list.d/ubuntu.list'
+    owner: 'root'
+    group: 'root'
+    mode: 0644
   notify: 'update apt cache'
   vars:
     ubt_repos:
@@ -104,34 +138,37 @@
   # Rather clunky workaround, but the apt_key module does not
   # support proxies yet: https://github.com/ansible/ansible/issues/31691
 - name: 'Configure repo keys from keyserver'
-  apt_key:
-    data: "{{ lookup('url', 'http://{{ repository_keyserver }}/pks/lookup?op=get&search=0x{{ keyserver_key.keyid }}', split_lines=False) }}"
+  ansible.builtin.apt_key:
+    data: "{{ lookup('url', 'http://' + repository_keyserver + '/pks/lookup?op=get&search=0x' + keyserver_key['keyid'], split_lines=False) }}"
   environment:
-    HTTP_PROXY: "{{ apt_proxy_url | default(omit) }}"
-    HTTPS_PROXY: "{{ apt_proxy_url |default(omit) }}"
+    http_proxy: "{{ apt_proxy_url | default(omit) }}"
+    https_proxy: "{{ apt_proxy_url |default(omit) }}"
   loop: "{{ apt_repo_keys_keyserver|default([]) }}"
   loop_control:
     loop_var: 'keyserver_key'
   when: apt_repo_keys_keyserver | length > 0
 
 - name: 'Configure repo keys from URLs'
-  apt_key:
-    data: "{{ lookup('url', '{{ url_key.url }}', split_lines=False) }}"
+  ansible.builtin.apt_key:
+    data: "{{ lookup('url', url_key['url'], split_lines=False) }}"
   environment:
-    HTTP_PROXY: "{{ apt_proxy_url | default(omit) }}"
-    HTTPS_PROXY: "{{ apt_proxy_url |default(omit) }}"
+    http_proxy: "{{ apt_proxy_url | default(omit) }}"
+    https_proxy: "{{ apt_proxy_url |default(omit) }}"
   loop: "{{ apt_repo_keys_url|default([]) }}"
   loop_control:
     loop_var: 'url_key'
   when: apt_repo_keys_url | length > 0
 
 - name: 'Configure other repos'
-  copy:
+  ansible.builtin.copy:
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
       deb {{ repo['url'] }} {{ repo['release'] }} {{ repo['repos'] }}
     dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.list"
+    owner: 'root'
+    group: 'root'
+    mode: 0644
   notify: 'update apt cache'
   loop: "{{ apt_other_repos|default([]) }}"
   loop_control:
@@ -139,19 +176,19 @@
   when: apt_other_repos | length > 0
 
 - name: 'Clean up default sources'
-  template:
+  ansible.builtin.template:
     src: 'sources.list.j2'
     dest: '/etc/apt/sources.list'
 
 - name: 'Disable apt-listchanges'
-  apt:
+  ansible.builtin.apt:
     name: 'apt-listchanges'
     state: 'absent'
     purge: true
   when: not apt_listchanges_installed
 
 - name: 'Enable apt-listchanges'
-  apt:
+  ansible.builtin.apt:
     name: 'apt-listchanges'
     state: 'present'
   when: apt_listchanges_installed
