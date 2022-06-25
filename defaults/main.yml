@@ -35,7 +35,7 @@ ubuntu_repo_components: 'main restricted universe multiverse'
 
 # Change logic of the role to suit Raspbian
 is_raspbian: false
-raspbian_repo_mirror: 'http://raspbian.raspberrypi.org/raspbian'
+raspbian_repo_mirror: 'http://raspbian.raspberrypi.org'
 raspbian_repo_components: 'main contrib non-free rpi'
 
 # Enable Debian Backports
