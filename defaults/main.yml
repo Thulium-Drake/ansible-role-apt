@@ -24,7 +24,7 @@
 # example_apt_proxy_direct__to_merge:
 #   - 'https://localrepo.example.com'
 
-# URL of the proxy to configure
+# URL of the proxy to configure, set to '' to disable
 apt_proxy_url: 'http://proxy.example.com:8000'
 
 # Which base mirror to use for Debian and Ubuntu
