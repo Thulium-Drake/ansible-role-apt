@@ -128,7 +128,6 @@
 - name: 'Install supporting packages'
   apt:
     name:
-      - 'apt-transport-https'
       - 'dirmngr'
       - 'unattended-upgrades'
       - 'curl'
@@ -179,6 +178,9 @@
   ansible.builtin.template:
     src: 'sources.list.j2'
     dest: '/etc/apt/sources.list'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
 
 - name: 'Disable apt-listchanges'
   ansible.builtin.apt:
