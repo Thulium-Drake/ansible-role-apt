@@ -3,11 +3,11 @@
   hosts: 'all'
   tasks:
     - name: 'Configure APT'
-      include_role:
+      ansible.builtin.include_role:
         name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
 
     - name: 'Install test package'
-      apt:
+      ansible.builtin.apt:
         name: 'ansible-apt-test-en'
         state: 'present'
         update_cache: true

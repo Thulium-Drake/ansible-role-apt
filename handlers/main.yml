@@ -1,19 +1,20 @@
 ---
-- name: 'update apt cache'
-  apt:
+- name: 'Update apt cache'
+  ansible.builtin.apt:
     update_cache: true
 
-- name: 'reload squid'
-  service:
+- name: 'Reload squid'
+  ansible.builtin.service:
     name: 'squid-deb-proxy'
     state: 'reloaded'
 
 - name: 'Generate cache directory'
-  command: squid -f /etc/squid-deb-proxy/squid-deb-proxy.conf -z -N
-  listen: 'generate squid cache'
+  ansible.builtin.command: squid -f /etc/squid-deb-proxy/squid-deb-proxy.conf -z -N
+  changed_when: true
+  listen: 'Generate squid cache'
 
 - name: 'Restart squid-deb-proxy'
-  service:
+  ansible.builtin.service:
     name: 'squid-deb-proxy'
     state: 'restarted'
-  listen: 'generate squid cache'
+  listen: 'Generate squid cache'

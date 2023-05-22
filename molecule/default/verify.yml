@@ -5,7 +5,7 @@
   gather_facts: false
   tasks:
     - name: 'Ensure test package installed'
-      apt:
+      ansible.builtin.apt:
         name: 'ansible-apt-test-en'
         state: 'present'
       register: result

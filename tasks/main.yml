@@ -1,6 +1,6 @@
 ---
 - name: 'Set up proxy server'
-  include_tasks: 'proxy_server.yml'
+  ansible.builtin.include_tasks: 'proxy_server.yml'
   when: apt_is_proxy_server
 
 # Configure repositories, keys and automatic upgrades
@@ -34,7 +34,7 @@
     dest: "{{ file['dest'] }}"
     owner: 'root'
     group: 'root'
-    mode: 0644
+    mode: '0644'
   loop:
     - src: 'apt-periodic.j2'
       dest: '/etc/apt/apt.conf.d/10periodic'
@@ -58,8 +58,8 @@
     dest: '/etc/apt/sources.list.d/debian.list'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'update apt cache'
+    mode: '0644'
+  notify: 'Update apt cache'
   vars:
     deb_repos:
       - distro: 'debian'
@@ -94,8 +94,8 @@
     dest: '/etc/apt/sources.list.d/raspbian.list'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'update apt cache'
+    mode: '0644'
+  notify: 'Update apt cache'
   vars:
     rasp_repos:
       - distro: 'raspbian'
@@ -116,8 +116,8 @@
     dest: '/etc/apt/sources.list.d/ubuntu.list'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'update apt cache'
+    mode: '0644'
+  notify: 'Update apt cache'
   vars:
     ubt_repos:
       - "{{ ansible_facts['distribution_release'] }}"
@@ -126,7 +126,7 @@
   when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: 'Install supporting packages'
-  apt:
+  ansible.builtin.apt:
     name:
       - 'dirmngr'
       - 'unattended-upgrades'
@@ -141,8 +141,8 @@
     data: "{{ lookup('url', 'http://' + repository_keyserver + '/pks/lookup?op=get&search=0x' + keyserver_key['keyid'], split_lines=False) }}"
   environment:
     http_proxy: "{{ apt_proxy_url | default(omit) }}"
-    https_proxy: "{{ apt_proxy_url |default(omit) }}"
-  loop: "{{ apt_repo_keys_keyserver|default([]) }}"
+    https_proxy: "{{ apt_proxy_url | default(omit) }}"
+  loop: "{{ apt_repo_keys_keyserver | default([]) }}"
   loop_control:
     loop_var: 'keyserver_key'
   when: apt_repo_keys_keyserver | length > 0
@@ -152,8 +152,8 @@
     data: "{{ lookup('url', url_key['url'], split_lines=False) }}"
   environment:
     http_proxy: "{{ apt_proxy_url | default(omit) }}"
-    https_proxy: "{{ apt_proxy_url |default(omit) }}"
-  loop: "{{ apt_repo_keys_url|default([]) }}"
+    https_proxy: "{{ apt_proxy_url | default(omit) }}"
+  loop: "{{ apt_repo_keys_url | default([]) }}"
   loop_control:
     loop_var: 'url_key'
   when: apt_repo_keys_url | length > 0
@@ -167,9 +167,9 @@
     dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.list"
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'update apt cache'
-  loop: "{{ apt_other_repos|default([]) }}"
+    mode: '0644'
+  notify: 'Update apt cache'
+  loop: "{{ apt_other_repos | default([]) }}"
   loop_control:
     loop_var: 'repo'
   when: apt_other_repos | length > 0

@@ -1,61 +1,63 @@
 ---
 # Install an APT proxy server for use with the rest of this role
 - name: 'Install software'
-  apt:
+  ansible.builtin.apt:
     name: 'squid-deb-proxy'
     state: 'present'
     update_cache: true
 
 - name: 'Ensure configuration'
-  template:
+  ansible.builtin.template:
     dest: '/etc/squid-deb-proxy/squid-deb-proxy.conf'
     src: 'squid-deb-proxy.conf.j2'
-    mode: 0644
+    mode: '0644'
     owner: 'root'
     group: 'root'
 
 - name: 'Ensure cache directory'
-  file:
+  ansible.builtin.file:
     path: "{{ apt_proxy_cache_dir }}"
     state: 'directory'
     owner: 'proxy'
     group: 'proxy'
-    mode: 0755
-  notify: 'generate squid cache'
+    mode: '0755'
+  notify: 'Generate squid cache'
 
-- meta: 'flush_handlers'
+- name: 'Flush handlers'
+  ansible.builtin.meta: 'flush_handlers'
 
 - name: 'Enable service'
-  service:
+  ansible.builtin.service:
     name: 'squid-deb-proxy'
     state: 'started'
     enabled: true
 
 - name: 'Ensure domain whitelist'
-  template:
+  ansible.builtin.template:
     src: 'domain-whitelist.acl.j2'
     dest: '/etc/squid-deb-proxy/mirror-dstdomain.acl.d/10-managed'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'reload squid'
+    mode: '0644'
+  notify: 'Reload squid'
 
 - name: 'Ensure package blacklist'
-  template:
+  ansible.builtin.template:
     src: 'package-blacklist.j2'
     dest: '/etc/squid-deb-proxy/pkg-blacklist.d/10-managed'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'reload squid'
+    mode: '0644'
+  notify: 'Reload squid'
 
 - name: 'Ensure allowed networks'
-  template:
+  ansible.builtin.template:
     src: 'allowed-networks.j2'
     dest: '/etc/squid-deb-proxy/allowed-networks-src.acl.d'
     owner: 'root'
     group: 'root'
-    mode: 0644
-  notify: 'reload squid'
+    mode: '0644'
+  notify: 'Reload squid'
 
-- meta: 'flush_handlers'
+- name: 'Flush handlers'
+  ansible.builtin.meta: 'flush_handlers'
