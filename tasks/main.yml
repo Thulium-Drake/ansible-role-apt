@@ -125,6 +125,9 @@
       - "{{ ansible_facts['distribution_release'] }}-security"
   when: ansible_facts['distribution'] == "Ubuntu"
 
+- name: 'Update sources if required'
+  ansible.builtin.meta: 'flush_handlers'
+
 - name: 'Install supporting packages'
   ansible.builtin.apt:
     name:
@@ -132,7 +135,6 @@
       - 'unattended-upgrades'
       - 'curl'
     state: 'present'
-    update_cache: true
 
   # Rather clunky workaround, but the apt_key module does not
   # support proxies yet: https://github.com/ansible/ansible/issues/31691
