@@ -49,6 +49,9 @@ repository_keyserver: 'keyserver.ubuntu.com'
 # Send daily email reports for available upgrades
 apt_listchanges_installed: false
 
+# Purge old-style .list repo files
+apt_purge_legacy_repos: false
+
 # Unattended upgrades settings
 #  - Enable the update/upgrade script (0=disable)
 apt_periodic_enable: 1
