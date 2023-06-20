@@ -46,37 +46,25 @@
     loop_var: 'file'
 
 - name: 'Configure Debian main repos'
+  # yamllint disable rule:line-length
   ansible.builtin.copy:
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
-      {% for deb_repo in deb_repos %}
-      {% if not deb_repo['skip'] %}
-      deb {{ debian_repo_mirror }}/{{ deb_repo['distro'] }} {{ deb_repo['release'] }} {{ debian_repo_components }}
-      {% endif %}
-      {% endfor %}
-    dest: '/etc/apt/sources.list.d/debian.list'
+      Types: deb
+      URIs: {{ debian_repo_mirror }}/debian
+      Suites: {{ ansible_facts['distribution_release'] }} {{ (debian_testing) | ternary('', ansible_facts['distribution_release'] + '-updates') }} {{ (debian_backports_enabled) | ternary(ansible_facts['distribution_release'] + '-backports', '') }}
+      Components: {{ debian_repo_components }}
+
+      Types: deb
+      URIs: {{ debian_repo_mirror }}/debian-security
+      Suites: {{ ansible_facts['distribution_release'] }}-security
+      Components: {{ debian_repo_components }}
+    dest: '/etc/apt/sources.list.d/debian.sources'
     owner: 'root'
     group: 'root'
     mode: '0644'
   notify: 'Update apt cache'
-  vars:
-    deb_repos:
-      - distro: 'debian'
-        release: "{{ ansible_facts['distribution_release'] }}"
-        skip: false
-      - distro: 'debian'
-        release: "{{ ansible_facts['distribution_release'] }}-updates"
-        skip: "{{ debian_testing }}"
-      - distro: 'debian-security'
-        release: "{{ ansible_facts['distribution_release'] }}-security"
-        skip: "{{ (ansible_facts['distribution_major_version'] >= '11') | ternary(debian_testing, true) }}"
-      - distro: 'debian-security'
-        release: "{{ ansible_facts['distribution_release'] }}/updates"
-        skip: "{{ (ansible_facts['distribution_major_version'] <= '10') | ternary(debian_testing, true) }}"
-      - distro: 'debian'
-        release: "{{ ansible_facts['distribution_release'] + '-backports' }}"
-        skip: "{{ not debian_backports_enabled }}"
   when:
     - ansible_facts['distribution'] == "Debian"
     - not is_raspbian
@@ -86,43 +74,34 @@
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
-      {% for rasp_repo in rasp_repos %}
-      {% if not rasp_repo['skip'] %}
-      deb {{ raspbian_repo_mirror }}/{{ rasp_repo['distro'] }} {{ rasp_repo['release'] }} {{ raspbian_repo_components }}
-      {% endif %}
-      {% endfor %}
-    dest: '/etc/apt/sources.list.d/raspbian.list'
+      Types: deb
+      URIs: {{ raspbian_repo_mirror }}/raspbian
+      Suites: {{ ansible_facts['distribution_release'] }}
+      Components: {{ raspbian_repo_components }}
+    dest: '/etc/apt/sources.list.d/raspbian.sources'
     owner: 'root'
     group: 'root'
     mode: '0644'
   notify: 'Update apt cache'
-  vars:
-    rasp_repos:
-      - distro: 'raspbian'
-        release: "{{ ansible_facts['distribution_release'] }}"
-        skip: false
   when:
     - ansible_facts['distribution'] == "Debian"
     - is_raspbian
 
 - name: 'Configure Ubuntu main repos'
   ansible.builtin.copy:
+  # yamllint disable rule:line-length
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
-      {% for ubt_repo in ubt_repos %}
-      deb {{ ubuntu_repo_mirror }} {{ ubt_repo }} {{ ubuntu_repo_components }}
-      {% endfor %}
-    dest: '/etc/apt/sources.list.d/ubuntu.list'
+      Types: deb
+      URIs: {{ ubuntu_repo_mirror }}/ubuntu
+      Suites: {{ ansible_facts['distribution_release'] }} {{ ansible_facts['distribution_release'] }}-updates {{ ansible_facts['distribution_release'] }}-security
+      Components: {{ ubuntu_repo_components }}
+    dest: '/etc/apt/sources.list.d/ubuntu.sources'
     owner: 'root'
     group: 'root'
     mode: '0644'
   notify: 'Update apt cache'
-  vars:
-    ubt_repos:
-      - "{{ ansible_facts['distribution_release'] }}"
-      - "{{ ansible_facts['distribution_release'] }}-updates"
-      - "{{ ansible_facts['distribution_release'] }}-security"
   when: ansible_facts['distribution'] == "Ubuntu"
 
 - name: 'Update sources if required'
@@ -136,37 +115,42 @@
       - 'curl'
     state: 'present'
 
-  # Rather clunky workaround, but the apt_key module does not
-  # support proxies yet: https://github.com/ansible/ansible/issues/31691
 - name: 'Configure repo keys from keyserver'
-  ansible.builtin.apt_key:
-    data: "{{ lookup('url', 'http://' + repository_keyserver + '/pks/lookup?op=get&search=0x' + keyserver_key['keyid'], split_lines=False) }}"
+  ansible.builtin.uri:
+    url: "http://{{ repository_keyserver }}/pks/lookup?op=get&search=0x{{ repo_key['keyserver_id'] }}"
+    dest: "/etc/apt/keyrings/{{ repo_key['name'] }}.asc"
   environment:
     http_proxy: "{{ apt_proxy_url | default(omit) }}"
     https_proxy: "{{ apt_proxy_url | default(omit) }}"
-  loop: "{{ apt_repo_keys_keyserver | default([]) }}"
+  loop: "{{ apt_other_repos | default([]) }}"
   loop_control:
-    loop_var: 'keyserver_key'
-  when: apt_repo_keys_keyserver | length > 0
+    loop_var: 'repo_key'
+  when: repo_key['keyserver_id'] is defined
 
 - name: 'Configure repo keys from URLs'
-  ansible.builtin.apt_key:
-    data: "{{ lookup('url', url_key['url'], split_lines=False) }}"
+  ansible.builtin.uri:
+    url: "{{ repo_key['key_url'] }}"
+    dest: "/etc/apt/keyrings/{{ repo_key['name'] }}.asc"
   environment:
     http_proxy: "{{ apt_proxy_url | default(omit) }}"
     https_proxy: "{{ apt_proxy_url | default(omit) }}"
-  loop: "{{ apt_repo_keys_url | default([]) }}"
+  loop: "{{ apt_other_repos | default([]) }}"
   loop_control:
-    loop_var: 'url_key'
-  when: apt_repo_keys_url | length > 0
+    loop_var: 'repo_key'
+  when: repo_key['key_url'] is defined
 
 - name: 'Configure other repos'
   ansible.builtin.copy:
     content: |
       # This file is managed by Ansible.
       # YOUR CHANGES WILL BE LOST!
-      deb {{ repo['url'] }} {{ repo['release'] }} {{ repo['repos'] }}
-    dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.list"
+      Types: deb
+      URIs: {{ repo['url'] }}
+      Suites: {{ repo['release'] }}
+      Components: {{ repo['repos'] }}
+      Signed-By: /etc/apt/keyrings/{{ repo['name'] }}.asc
+      {{ (repo['arch'] is defined) | ternary('Architectures:' + repo['arch'], '') }}
+    dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.sources"
     owner: 'root'
     group: 'root'
     mode: '0644'
@@ -175,6 +159,24 @@
   loop_control:
     loop_var: 'repo'
   when: apt_other_repos | length > 0
+
+- name: 'Purge legacy *.list files'
+  when: apt_purge_legacy_repos
+  block:
+    - name: 'List repo files'
+      ansible.builtin.find:
+        path: '/etc/apt/sources.list.d'
+        pattern: '*.list'
+        get_checksum: false
+      register: 'repo_files'
+
+    - name: 'Purge repo files'
+      ansible.builtin.file:
+        path: "{{ repo_file['path'] }}"
+        state: 'absent'
+      loop: "{{ repo_files['files'] }}"
+      loop_control:
+        loop_var: 'repo_file'
 
 - name: 'Clean up default sources'
   ansible.builtin.template:

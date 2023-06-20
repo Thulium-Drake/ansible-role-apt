@@ -1,24 +1,23 @@
 ---
-# List of repository keys that can be retrieved using keyservers
-# This variable is set by merging vars that end with _apt_repo_keys_keyserver
-# to the list below. E.g.
-#
-# example_apt_repo_keys_keyserver__to_merge:
-#   - { name: 'example', keyid: 'xxxx'}
-
-# List of repository keys that can be retrieved from a specific location
-# This variable is set by merging vars that end with _apt_repo_keys_url
-# to the list below. E.g.
-#
-# example_apt_repo_keys_url__to_merge:
-#   - { name: 'example', url: 'http://example.com/pub.gpg' }
-
 # List of repositories
 # This variable is set by merging vars that end with _apt_other_repos
 # to the list below. E.g.
 #
 # example_apt_other_repos__to_merge:
-#   - { name: 'example', url: 'http://repository.example.com', release: 'stable', repos: 'main' }
+#   - name: 'example'
+#     url: 'http://repository.example.com'
+#     release: 'stable'
+#     repos: 'main'
+#     arch: 'amd64'
+#     keyserver_id: 'xxx'
+#   - name: 'example'
+#     url: 'http://repository.example.net'
+#     release: 'stable'
+#     repos: 'main'
+#     key_url: 'http://example.net/pub.gpg'
+#
+# Do note that the GPG key must be armored when retrieved!
+
 #
 # A list of repositories that bypass the proxy (e.g. local repos)
 # example_apt_proxy_direct__to_merge:
@@ -30,7 +29,7 @@ apt_proxy_url: 'http://proxy.example.com:8000'
 # Which base mirror to use for Debian and Ubuntu
 debian_repo_mirror: 'http://ftp.nl.debian.org'
 debian_repo_components: 'main contrib non-free'
-ubuntu_repo_mirror: 'http://archive.ubuntu.com/ubuntu'
+ubuntu_repo_mirror: 'http://archive.ubuntu.com'
 ubuntu_repo_components: 'main restricted universe multiverse'
 
 # Change logic of the role to suit Raspbian
