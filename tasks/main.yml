@@ -3,19 +3,6 @@
   ansible.builtin.include_tasks: 'proxy_server.yml'
   when: apt_is_proxy_server
 
-# Configure repositories, keys and automatic upgrades
-- name: 'Merge repo_keys_keyserver (requires Ansible Merge Vars)'
-  merge_vars:
-    suffix_to_merge: '_apt_repo_keys_keyserver__to_merge'
-    merged_var_name: 'apt_repo_keys_keyserver'
-    expected_type: 'list'
-
-- name: 'Merge repo_keys_url (requires Ansible Merge Vars)'
-  merge_vars:
-    suffix_to_merge: '_apt_repo_keys_url__to_merge'
-    merged_var_name: 'apt_repo_keys_url'
-    expected_type: 'list'
-
 - name: 'Merge other_repos (requires Ansible Merge Vars)'
   merge_vars:
     suffix_to_merge: 'apt_other_repos__to_merge'
