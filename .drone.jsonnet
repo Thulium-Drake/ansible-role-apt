@@ -72,7 +72,7 @@ local Converge(distro) = {
       { disable: true },
     steps: [
       Clone(),
-      Converge("debian11"),
+      Converge("debian12"),
     ],
     volumes: [
       { name: "docker",
