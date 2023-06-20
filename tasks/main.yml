@@ -106,6 +106,9 @@
   ansible.builtin.uri:
     url: "http://{{ repository_keyserver }}/pks/lookup?op=get&search=0x{{ repo_key['keyserver_id'] }}"
     dest: "/etc/apt/keyrings/{{ repo_key['name'] }}.asc"
+    status_code:
+      - 200
+      - 304
   environment:
     http_proxy: "{{ apt_proxy_url | default(omit) }}"
     https_proxy: "{{ apt_proxy_url | default(omit) }}"
@@ -118,6 +121,9 @@
   ansible.builtin.uri:
     url: "{{ repo_key['key_url'] }}"
     dest: "/etc/apt/keyrings/{{ repo_key['name'] }}.asc"
+    status_code:
+      - 200
+      - 304
   environment:
     http_proxy: "{{ apt_proxy_url | default(omit) }}"
     https_proxy: "{{ apt_proxy_url | default(omit) }}"
@@ -136,7 +142,7 @@
       Suites: {{ repo['release'] }}
       Components: {{ repo['repos'] }}
       Signed-By: /etc/apt/keyrings/{{ repo['name'] }}.asc
-      {{ (repo['arch'] is defined) | ternary('Architectures:' + repo['arch'], '') }}
+      {{ (repo['arch'] | default('') | length > 0) | ternary('Architectures:' + repo['arch'] | default(''), '') }}
     dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.sources"
     owner: 'root'
     group: 'root'
