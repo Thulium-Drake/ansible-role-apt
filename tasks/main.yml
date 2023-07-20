@@ -120,7 +120,7 @@
 - name: 'Configure repo keys from URLs'
   ansible.builtin.uri:
     url: "{{ repo_key['key_url'] }}"
-    dest: "/etc/apt/keyrings/{{ repo_key['name'] }}.asc"
+    dest: "/etc/apt/keyrings/{{ repo_key['name'] }}.{{ (repo_key['key_armored'] | default(true)) | ternary('asc', 'gpg') }}"
     status_code:
       - 200
       - 304

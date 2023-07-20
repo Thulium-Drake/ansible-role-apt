@@ -4,19 +4,23 @@
 # to the list below. E.g.
 #
 # example_apt_other_repos__to_merge:
-#   - name: 'example'
+#   - name: 'example-keyserver_id'
 #     url: 'http://repository.example.com'
 #     release: 'stable'
 #     repos: 'main'
 #     arch: 'amd64'
 #     keyserver_id: 'xxx'
-#   - name: 'example'
+#   - name: 'example-key_url'
+#     url: 'http://repository.example.net'
+#     release: 'stable'
+#     repos: 'main'
+#     key_url: 'http://example.net/pub.asc'
+#   - name: 'example-unarmored-gpg-key'
 #     url: 'http://repository.example.net'
 #     release: 'stable'
 #     repos: 'main'
 #     key_url: 'http://example.net/pub.gpg'
-#
-# Do note that the GPG key must be armored when retrieved!
+#     key_armored: false  # defaults to true
 
 #
 # A list of repositories that bypass the proxy (e.g. local repos)
