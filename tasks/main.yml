@@ -141,7 +141,7 @@
       URIs: {{ repo['url'] }}
       Suites: {{ repo['release'] }}
       Components: {{ repo['repos'] }}
-      Signed-By: /etc/apt/keyrings/{{ repo['name'] }}.{{ (repo_key['key_armored'] | default(true)) | ternary('asc', 'gpg') }}
+      Signed-By: /etc/apt/keyrings/{{ repo['name'] }}.{{ (repo['key_armored'] | default(true)) | ternary('asc', 'gpg') }}
       {{ (repo['arch'] | default('') | length > 0) | ternary('Architectures:' + repo['arch'] | default(''), '') }}
     dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.sources"
     owner: 'root'
