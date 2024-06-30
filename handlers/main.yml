@@ -5,16 +5,16 @@
 
 - name: 'Reload squid'
   ansible.builtin.service:
-    name: 'squid-deb-proxy'
+    name: 'squid'
     state: 'reloaded'
 
 - name: 'Generate cache directory'
-  ansible.builtin.command: squid -f /etc/squid-deb-proxy/squid-deb-proxy.conf -z -N
+  ansible.builtin.command: squid -f /etc/squid/squid.conf -z -N
   changed_when: true
   listen: 'Generate squid cache'
 
-- name: 'Restart squid-deb-proxy'
+- name: 'Restart squid'
   ansible.builtin.service:
-    name: 'squid-deb-proxy'
+    name: 'squid'
     state: 'restarted'
   listen: 'Generate squid cache'
