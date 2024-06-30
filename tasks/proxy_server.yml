@@ -2,14 +2,14 @@
 # Install an APT proxy server for use with the rest of this role
 - name: 'Install software'
   ansible.builtin.apt:
-    name: 'squid-deb-proxy'
+    name: 'squid'
     state: 'present'
     update_cache: true
 
 - name: 'Ensure configuration'
   ansible.builtin.template:
-    dest: '/etc/squid-deb-proxy/squid-deb-proxy.conf'
-    src: 'squid-deb-proxy.conf.j2'
+    dest: '/etc/squid/squid.conf'
+    src: 'squid.conf.j2'
     mode: '0644'
     owner: 'root'
     group: 'root'
@@ -28,14 +28,14 @@
 
 - name: 'Enable service'
   ansible.builtin.service:
-    name: 'squid-deb-proxy'
+    name: 'squid'
     state: 'started'
     enabled: true
 
 - name: 'Ensure domain whitelist'
   ansible.builtin.template:
     src: 'domain-whitelist.acl.j2'
-    dest: '/etc/squid-deb-proxy/mirror-dstdomain.acl.d/10-managed'
+    dest: '/etc/squid/mirror-dstdomain.acl'
     owner: 'root'
     group: 'root'
     mode: '0644'
@@ -44,7 +44,7 @@
 - name: 'Ensure package blacklist'
   ansible.builtin.template:
     src: 'package-blacklist.j2'
-    dest: '/etc/squid-deb-proxy/pkg-blacklist.d/10-managed'
+    dest: '/etc/squid/pkg-blacklist-regexp.acl'
     owner: 'root'
     group: 'root'
     mode: '0644'
@@ -53,7 +53,7 @@
 - name: 'Ensure allowed networks'
   ansible.builtin.template:
     src: 'allowed-networks.j2'
-    dest: '/etc/squid-deb-proxy/allowed-networks-src.acl.d'
+    dest: '/etc/squid/allowed-networks-src.acl'
     owner: 'root'
     group: 'root'
     mode: '0644'
