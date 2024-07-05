@@ -3,18 +3,6 @@
   ansible.builtin.include_tasks: 'proxy_server.yml'
   when: apt_is_proxy_server
 
-- name: 'Merge other_repos (requires Ansible Merge Vars)'
-  merge_vars:
-    suffix_to_merge: 'apt_other_repos__to_merge'
-    merged_var_name: 'apt_other_repos'
-    expected_type: 'list'
-
-- name: 'Merge apt_proxy_direct (requires Ansible Merge Vars)'
-  merge_vars:
-    suffix_to_merge: 'apt_proxy_direct__to_merge'
-    merged_var_name: 'apt_proxy_direct'
-    expected_type: 'list'
-
 - name: 'Configure APT'
   ansible.builtin.template:
     src: "{{ file['src'] }}"

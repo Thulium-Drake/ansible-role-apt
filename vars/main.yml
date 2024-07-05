@@ -1,0 +1,4 @@
+---
+# Cobble together APT repos and proxy direct domains
+apt_other_repos: "{{ lookup('community.general.merge_variables', 'apt_other_repos__to_merge', pattern_type='suffix', initial_value=[]) }}"
+apt_proxy_direct: "{{ lookup('community.general.merge_variables', 'apt_proxy_direct__to_merge', pattern_type='suffix', initial_value=[]) }}"
