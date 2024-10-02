@@ -28,7 +28,7 @@
 #   - 'https://localrepo.example.com'
 
 # URL of the proxy to configure, set to '' to disable
-apt_proxy_url: 'http://proxy.example.com:8000'
+apt_proxy_url: ''
 
 # Which base mirror to use for Debian and Ubuntu
 debian_repo_mirror: 'http://ftp.nl.debian.org'
