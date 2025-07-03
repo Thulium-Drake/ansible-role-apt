@@ -87,6 +87,24 @@
     group: 'root'
     mode: '0644'
 
+- name: 'Purge legacy *.list files'
+  when: apt_purge_legacy_repos
+  block:
+    - name: 'List repo files'
+      ansible.builtin.find:
+        path: '/etc/apt/sources.list.d'
+        pattern: '*.list'
+        get_checksum: false
+      register: 'repo_files'
+
+    - name: 'Purge repo files'
+      ansible.builtin.file:
+        path: "{{ repo_file['path'] }}"
+        state: 'absent'
+      loop: "{{ repo_files['files'] }}"
+      loop_control:
+        loop_var: 'repo_file'
+
 - name: 'Update sources if required'
   ansible.builtin.meta: 'flush_handlers'
 
@@ -148,24 +166,6 @@
   loop_control:
     loop_var: 'repo'
   when: apt_other_repos | length > 0
-
-- name: 'Purge legacy *.list files'
-  when: apt_purge_legacy_repos
-  block:
-    - name: 'List repo files'
-      ansible.builtin.find:
-        path: '/etc/apt/sources.list.d'
-        pattern: '*.list'
-        get_checksum: false
-      register: 'repo_files'
-
-    - name: 'Purge repo files'
-      ansible.builtin.file:
-        path: "{{ repo_file['path'] }}"
-        state: 'absent'
-      loop: "{{ repo_files['files'] }}"
-      loop_control:
-        loop_var: 'repo_file'
 
 - name: 'Disable apt-listchanges'
   ansible.builtin.apt:
