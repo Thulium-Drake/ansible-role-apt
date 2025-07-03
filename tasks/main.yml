@@ -79,6 +79,14 @@
   notify: 'Update apt cache'
   when: ansible_facts['distribution'] == "Ubuntu"
 
+- name: 'Clean up default sources'
+  ansible.builtin.template:
+    src: 'sources.list.j2'
+    dest: '/etc/apt/sources.list'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
 - name: 'Update sources if required'
   ansible.builtin.meta: 'flush_handlers'
 
@@ -158,14 +166,6 @@
       loop: "{{ repo_files['files'] }}"
       loop_control:
         loop_var: 'repo_file'
-
-- name: 'Clean up default sources'
-  ansible.builtin.template:
-    src: 'sources.list.j2'
-    dest: '/etc/apt/sources.list'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
 
 - name: 'Disable apt-listchanges'
   ansible.builtin.apt:
