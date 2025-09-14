@@ -9,18 +9,23 @@
 #     release: 'stable'
 #     repos: 'main'
 #     arch: 'amd64'
-#     keyserver_id: 'xxx'
+#     keyserver_id: 'xxx'   # Downloads the key from a keyserver
 #   - name: 'example-key_url'
 #     url: 'http://repository.example.net'
 #     release: 'stable'
 #     repos: 'main'
-#     key_url: 'http://example.net/pub.asc'
+#     key_url: 'http://example.net/pub.asc'  # Downloads the key from a URL
 #   - name: 'example-unarmored-gpg-key'
 #     url: 'http://repository.example.net'
 #     release: 'stable'
 #     repos: 'main'
 #     key_url: 'http://example.net/pub.gpg'
 #     key_armored: false  # defaults to true
+#   - name: 'example-gpg-keyfile'
+#     url: 'http://repository.example.net'
+#     release: 'stable'
+#     repos: 'main'
+#     key_file: '/etc/apt/trusted.gpg.d/example.gpg'  # If the key file is already present on the system
 
 #
 # A list of repositories that bypass the proxy (e.g. local repos)

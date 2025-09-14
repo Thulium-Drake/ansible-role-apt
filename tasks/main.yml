@@ -155,7 +155,8 @@
       URIs: {{ repo['url'] }}
       Suites: {{ repo['release'] }}
       Components: {{ repo['repos'] }}
-      Signed-By: /etc/apt/keyrings/{{ repo['name'] }}.{{ (repo['key_armored'] | default(true)) | ternary('asc', 'gpg') }}
+      Signed-By: {{ repo.get('key_file', '/etc/apt/keyrings/' + repo['name'] + '.' + (('asc' if repo.get('key_armored', true) else 'gpg'))) }}
+
       {{ (repo['arch'] | default('') | length > 0) | ternary('Architectures:' + repo['arch'] | default(''), '') }}
     dest: "/etc/apt/sources.list.d/{{ repo['name'] }}.sources"
     owner: 'root'
