@@ -30,11 +30,13 @@
       URIs: {{ debian_repo_mirror }}/debian
       Suites: {{ ansible_facts['distribution_release'] }} {{ (debian_testing) | ternary('', ansible_facts['distribution_release'] + '-updates') }} {{ (debian_backports_enabled) | ternary(ansible_facts['distribution_release'] + '-backports', '') }}
       Components: {{ debian_repo_components }}
+      Signed-By: /etc/apt/trusted.gpg.d/debian-archive-{{ ansible_facts['distribution_release'] }}-automatic.asc
 
       Types: deb
       URIs: {{ debian_repo_mirror }}/debian-security
       Suites: {{ ansible_facts['distribution_release'] }}-security
       Components: {{ debian_repo_components }}
+      Signed-By: /etc/apt/trusted.gpg.d/debian-archive-{{ ansible_facts['distribution_release'] }}-security-automatic.asc
     dest: '/etc/apt/sources.list.d/debian.sources'
     owner: 'root'
     group: 'root'
