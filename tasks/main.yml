@@ -74,6 +74,7 @@
       URIs: {{ ubuntu_repo_mirror }}/ubuntu
       Suites: {{ ansible_facts['distribution_release'] }} {{ ansible_facts['distribution_release'] }}-updates {{ ansible_facts['distribution_release'] }}-security
       Components: {{ ubuntu_repo_components }}
+      Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
     dest: '/etc/apt/sources.list.d/ubuntu.sources'
     owner: 'root'
     group: 'root'
