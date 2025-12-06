@@ -2,10 +2,10 @@
 dependency:
   name: 'galaxy'
 driver:
-  name: ${DRIVER_NAME:-docker}
+  name: ${DRIVER_NAME:-podman}
 platforms:
   - name: "molecule-apt"
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian10}-ansible:latest"
+    image: "git.element-networks.nl/containers/${MOLECULE_DISTRO:-debian13}-ansible:latest"
     command: '/lib/systemd/systemd'
     pre_build_image: true
     volumes:
@@ -16,5 +16,7 @@ provisioner:
   config_options:
     defaults:
       roles_path: "$MOLECULE_PROJECT_DIRECTORY/.."
+  env:
+    ANSIBLE_VERBOSITY: 2
 verifier:
   name: 'ansible'
