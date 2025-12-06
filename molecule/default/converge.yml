@@ -16,13 +16,13 @@
     debian_backports_enabled: true
     ansible_apt_other_repos__to_merge:
       - name: 'test-repo'
-        url: 'http://repo.element-networks.nl'
-        key_url: 'http://repo.element-networks.nl/public.gpg'
+        url: 'http://apt.element-networks.nl'
+        key_url: 'http://apt.element-networks.nl/public.gpg'
         release: 'ansible-test'
         repos: 'main'
     ansible_apt_proxy_direct__to_merge:
-      - 'repo.element-networks.nl'
+      - 'apt.element-networks.nl'
     apt_proxy_url: 'http://localhost:8000'
     apt_proxy_whitelist:
       - 'ftp.nl.debian.org'
-      - 'repo.element-networks.nl'
+      - 'apt.element-networks.nl'
